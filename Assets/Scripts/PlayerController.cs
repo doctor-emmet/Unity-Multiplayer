@@ -3,6 +3,10 @@ using UnityEngine.Networking;
 
 public class PlayerController : NetworkBehaviour
 {
+
+	public GameObject bulletPrefab;
+	public Transform bulletSpawn;
+
 	void Update()
 	{
 
@@ -15,5 +19,27 @@ public class PlayerController : NetworkBehaviour
 
 		transform.Rotate(0, x, 0);
 		transform.Translate(0, 0, z);
+
+		if (Input.GetKeyDown (KeyCode.Space)) {
+			CmdFire ();
+		}
 	}
+
+	public override void OnStartLocalPlayer()
+	{
+		GetComponent<MeshRenderer>().material.color = Color.blue;
+	}
+
+	[Command]
+	void CmdFire()
+	{
+		var bullet = (GameObject)Instantiate (bulletPrefab, bulletSpawn.position, bulletSpawn.rotation);
+
+		bullet.GetComponent<Rigidbody> ().velocity = bullet.transform.forward * 20;
+
+		NetworkServer.Spawn (bullet);
+
+		Destroy (bullet, 2.0f);
+	}
+
 }
